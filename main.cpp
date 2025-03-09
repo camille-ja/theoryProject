@@ -2,62 +2,154 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 
 using namespace std;
-void readFiles(){
-    string descriptionFile = "astarGrammar.txt";
-    string inputFile = "astarGrammarInput.txt";
-    //cin >> descriptionFile; 
-    //cin >> inputFile;
-    cout << "c++ CFGTest " << descriptionFile << " " << inputFile << endl;
-
-    ifstream fin;
-    fin.open(descriptionFile);
-    if(fin.fail()){
-        cerr << "Files not found" <<endl;
+class Variables{
+    string name = "-";
+    string left = "-";
+    string right = "-";
+    bool rightExists = false;
+    bool leftExists = false;
+    bool isStart = false;
+    string epsilon = "e";
+    public:
+    Variables(string n, bool e){
+        name = n;
+        isStart = e;
     }
-    string tempLine = "";
-    getline(fin, tempLine);
-    cout << "Variables: " + tempLine << endl;
-
-    vector <string> variables;
-    //cout << tempLine<< endl;
-    for(int i = 0; i < tempLine.size(); i++){
-        string symbol = tempLine.substr(i,1);
-        if(symbol != "," && symbol != " "){
-            variables.insert(variables.begin(), symbol);
+        string getLeft(){
+            return left;
         }
-    }
-
-    getline(fin, tempLine);
-    cout << "Terminals: " + tempLine << endl;
-
-    vector <string> terminals;
-    for(int i = 0; i < tempLine.size(); i++){
-        string symbol = tempLine.substr(i,1);
-        if(symbol != "," && symbol != " "){
-            terminals.insert(terminals.begin(), symbol);
+        bool hasEpsilon(){
+            return isStart;
         }
-    }
-    
-    vector<string> rules;
-    //store rules in vector
-    //index 0 is start variable (has to be bc cnf)
-    //use separation to find what the rules go to 
-   
-    
+        string getRight(){
+            return right;
+        }
+        void setLeft(string l){
+            left = l;
+            leftExists = true;
+        }
+        void setRight(string r){
+            right = r;
+            rightExists = true;
+        }
+        string getVariable(){
+            return name;
+        }
+        bool hasLeft(){
+            return leftExists;
+        }
+        bool hasRight(){
+            return rightExists;
+        }
+};
 
-}
+
+
+ class Grammar{
+    public:
+    void read(){
+        string descriptionFile = "astarGrammar.txt";
+        string inputFile = "astarGrammarInput.txt";
+        //cin >> descriptionFile; 
+        //cin >> inputFile;
+        cout << "c++ CFGTest " << descriptionFile << " " << inputFile << endl;
+
+        ifstream fin;
+        fin.open(descriptionFile);
+        if(fin.fail()){
+            cerr << "Files not found" <<endl;
+        }
+        string tempLine = "";
+        getline(fin, tempLine);
+
+        vector <string> variables;
+        //cout << tempLine<< endl;
+        for(int i = 0; i < tempLine.size(); i++){
+            string symbol = tempLine.substr(i,1);
+            if(symbol != "," && symbol != " "){
+                variables.insert(variables.begin(), symbol);
+            }
+        }
+
+
+
+        cout << "Variables: ";
+        for(int i = variables.size() - 1; i > 0; i--){
+            cout << variables[i] << ", ";
+        }
+        cout << variables[0] << endl;
+
+        getline(fin, tempLine);
+
+        vector <string> terminals;
+        for(int i = 0; i < tempLine.size(); i++){
+            string symbol = tempLine.substr(i,1);
+            if(symbol != "," && symbol != " "){
+                terminals.insert(terminals.begin(), symbol);
+            }
+        }
+
+        cout << "Terminals: ";
+        for(int i = terminals.size() - 1; i > 0; i--){
+            cout << terminals[i] << ", ";
+        }
+        cout << terminals[0] << endl;
+
+        vector <Variables> newVariables;
+        for(int i = 0; i < variables.size(); i++){
+            string rules = "";
+            getline(fin, rules);
+            if(i == 0){ //If we are reading in the start variable, add a special case to add the epsilon
+                newVariables.insert(newVariables.begin(), Variables(rules.substr(0,1), true));
+            } //Reads in normal variables and sets the name as what was read in
+            else{newVariables.insert(newVariables.begin(), Variables(rules.substr(0,1), false));}
+            int m = 0;
+            int n = rules.length();
+            while(m < n){
+                if(rules.substr(0, 1) == ">" || rules.substr(0, 1) == "|"){
+                    string temp = rules.substr(2, rules.length());
+                    if(!newVariables[0].hasLeft()){
+                        newVariables[0].setLeft(temp.substr(0, temp.find(" ")));
+                    } else if(!newVariables[0].hasRight()) {
+                        newVariables[0].setRight(temp.substr(0, temp.find(" ")));
+                    }
+                }
+                m++;
+                rules = rules.substr(1, rules.length());
+            }
+        }
+
+        cout << "Rules: " << endl;
+        for(int i = newVariables.size() - 1; i >= 0; i--){
+            if(newVariables[i].hasLeft()){
+                cout << newVariables[i].getVariable() <<  " -> " << newVariables[i].getLeft() << endl;
+            }
+            if(newVariables[i].hasRight()){
+                cout << newVariables[i].getVariable() <<  " -> " << newVariables[i].getRight() <<endl;
+            }
+            if(newVariables[i].hasEpsilon()){
+                cout << newVariables[i].getVariable() <<  " -> " << "e" << endl;
+            }
+        }
+        cout << "Start Varaiable: " << newVariables[newVariables.size() - 1].getVariable() << endl;
+    }
+};
+
+
+
 
 int main() {
     std::cout << "hi" << std::endl;
-    readFiles();
+    Grammar().read();
     return 0;
 }
 /**    #!/bin/bash
     g++ main.cpp -o main
-    ./main */
+./main */
 
 /*It should take two command line arguments. 
 
