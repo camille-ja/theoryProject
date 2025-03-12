@@ -12,13 +12,11 @@ class Variables{
     string right = "-";
     bool rightExists = false;
     bool leftExists = false;
-    bool isStart = false;
-    string epsilon = "e";
+    bool epsilon = false;
     //Initializes a new variable
     public:
-    Variables(string n, bool e){
+    Variables(string n){
         name = n;
-        isStart = e;
         }
     //Returns the terminal on the left
     string getLeft();
@@ -36,6 +34,8 @@ class Variables{
     bool hasLeft();
     //Returns true if the variable has a right child, false otherwise
     bool hasRight();
+    // add later
+    void setEpsilon();
     }; //end of class definition
     
     string Variables::getLeft(){
@@ -45,7 +45,7 @@ class Variables{
         return right;
     }  
     bool Variables::hasEpsilon(){
-        return isStart;
+        return epsilon;
     }
     void Variables::setLeft(string l){
         left = l;
@@ -63,6 +63,9 @@ class Variables{
     }
     bool Variables::hasRight(){
         return rightExists;
+    }
+    void Variables::setEpsilon(){
+        epsilon = true;
     }
 
 
@@ -130,26 +133,31 @@ class Grammar{
             string rules = "";
             getline(fin, rules); //Gets an entire line of the rules of a variable
             if(i == 0){ //If we are reading in the start variable, add a special case to add the epsilon
-                newVariables.insert(newVariables.begin(), Variables(rules.substr(0,1), true));
+                newVariables.insert(newVariables.begin(), Variables(rules.substr(0,1)));
             } //Reads in normal variables and sets the name as what was read in
             else{
-                newVariables.insert(newVariables.begin(), Variables(rules.substr(0,1), false));
+                newVariables.insert(newVariables.begin(), Variables(rules.substr(0,1)));
             }
             int m = 0; //acts as the index for the index of the rules string we're looking at
             int n = rules.length();
             while(m < n){ //loops untill we've looked at every index of rules
                 if(rules.substr(0, 1) == ">" || rules.substr(0, 1) == "|"){ //If we've found one of these symbols, there's a terminal after it
-                    string temp = rules.substr(2, rules.length()); //Saves the string at the start of the terminal
-                    if(!newVariables[0].hasLeft()){ //If the variable doesn't has a left terminal, set the terminal to be the variables left child
-                        newVariables[0].setLeft(temp.substr(0, temp.find(" "))); //Saves the portion of rules until we hit a space
-                    } else if(!newVariables[0].hasRight()) { //If the variable doesn't has a right terminal, set the terminal to be the variables right child
-                        newVariables[0].setRight(temp.substr(0, temp.find(" ")));
-                    }
-                }
-                m++; 
-                rules = rules.substr(1, rules.length()); //Decreases rules so we can look at the next index
-            }
-        }
+                    string temp = rules.substr(2, rules.length());
+                   string newTemp = temp.substr(0, temp.find(" "));
+                   if(newTemp == "e"){
+                       newVariables[0].setEpsilon();
+                   }
+                   if(!newVariables[0].hasLeft()){
+                       newVariables[0].setLeft(newTemp);
+                   } else if(!newVariables[0].hasRight()) {
+                       newVariables[0].setRight(newTemp);
+                   }
+               }
+               m++;
+               rules = rules.substr(1, rules.length());
+           }
+       }
+
 
         cout << "Rules: " << endl;
         //Prints out the rules in order. If the variable doesn't have a left, right, or epsilon, nothing is printed for that category
@@ -165,7 +173,41 @@ class Grammar{
             }
         }
         cout << "Start Varaiable: " << newVariables[newVariables.size() - 1].getVariable() << endl;
-}
+
+       ifstream newFin;
+       newFin.open(inputFile);
+       if(newFin.fail()){
+           cerr << "Files not found" <<endl;
+       }
+       string inputLine = "";
+       getline(newFin, inputLine);
+
+       cout << inputLine << ": ";
+       if(inputLine == ""){
+           if (newVariables[newVariables.size() - 1].hasEpsilon()){
+               cout << "Accept" << endl;
+           } else {
+               cout << "Reject" << endl;
+           }
+        }
+
+        // for(int i = 0; i < inputLine.length(); i++){
+            // for(int j = 0; j < newVariables.size(); j++){
+                int arr[inputLine.length()][2 * inputLine.length() - 1];
+                for(int i = 0; i < inputLine.length() + 1; i ++){
+                    for(int j = 0; j < 2 * inputLine.length(); j++){
+                        arr[i][j] = 0;
+                    }
+                }
+                for(int i = 0; i < inputLine.length() + 1; i ++){
+                    for(int j = 0; j < 2 * inputLine.length(); j++){
+                        cout << arr[i][j] << endl;
+                    }
+                }
+            // }
+        // }
+
+       }
 
 
 
