@@ -36,6 +36,7 @@ class Variables{
     bool hasRight();
     // this sets the variable to have an epsilon terminal
     void setEpsilon();
+    void setVariable(string v);
     }; //end of class definition
     
     string Variables::getLeft(){
@@ -66,6 +67,9 @@ class Variables{
     }
     void Variables::setEpsilon(){
         epsilon = true;
+    }
+    void Variables::setVariable(string v){
+        name = v;
     }
 
 
@@ -165,8 +169,6 @@ class Grammar{
 
 
         cout << "Rules: " << endl;
-        cout<< newVariables.size() << endl;
-        cout << newVariables[1].getVariable() << endl;
         //Prints out the rules in order. If the variable doesn't have a left, right, or epsilon, nothing is printed for that category
         for(int i = 0; i < newVariables.size(); i++){
             if(newVariables[i].hasLeft()){
@@ -193,16 +195,14 @@ class Grammar{
        cout << inputLine << ": ";
        //if the string is empty, meaning it is epsilon, we want to check if the variable accepts epsilon
        if(inputLine == ""){
-           if (newVariables[newVariables.size() - 1].hasEpsilon()){
+           if (newVariables[0].hasEpsilon()){
                cout << "Accept" << endl;
            } else {
                cout << "Reject" << endl;
            }
         } else {
-
-
                 int numRows = inputLine.length();
-                int numCols = 2 * inputLine.length() - 1;
+                int numCols = 3 * inputLine.length() - 1;
 
                 vector<vector<Variables>> table(numRows, vector<Variables>(numCols, Variables("--")));
 
@@ -211,37 +211,43 @@ class Grammar{
 
                 // Initialize elements
 
-                for(int i = 0; i < inputLine.length() - 1; i++){
+
+                for(int i = 0; i < inputLine.length(); i++){
                     string w = inputLine.substr(i, i + 1);
                         for(int j = 0; j < newVariables.size(); j++){
                             if(newVariables[j].getLeft() == w || newVariables[j].getRight() == w){
-                                table[i][j] = newVariables[j].getVariable();
+                               //cout << "variable: " << newVariables[j].getVariable() << endl;
+                                table[i][i].setVariable(newVariables[j].getVariable());
+
                             }
                         }
-                    }
                 }
-                 for(int l = 1; l < inputLine.length(); l++){
-                     for(int i = 0; i < inputLine.length() - l + 1; i++){
+
+                for(int l = 1; l < inputLine.length() - 1; l++){
+                     for(int i = 0; i < inputLine.length() - 1; i++){
                          int j = i + l - 1;
                          for(int k = i; k < j - 1; k++){
                              if(newVariables[k].getLeft().length() == 2){
-                                 string var = newVariables[k].getLeft().substr(0,1); // 10 isolated first variable within the string
-                                 for(int r = k + 1; r < newVariables.size(); r++){
-                                    if(var == newVariables[r].getVariable()){
-                                        
-                                    }
+                                 string var = newVariables[k].getLeft().substr(0,1);
+                                    if(table[i][k].getVariable() == var){
+                                        string var2 = newVariables[k].getLeft().substr(1,2);
+                                        if(table[k + 1][j].getVariable() == var2){
+                                            table[i][j] = newVariables[k];
+                                        }
+                                    } 
                                 }
                              }
                          }
                      }
+                    //cout << " bottom if " << table[0][inputLine.length() - 1].getVariable() << endl;
+                     if(table[0][inputLine.length() - 1].getVariable() == newVariables[0].getVariable()){
+                        cout << "Accept" << endl;
+                     } else {
+                        cout << "Reject" << endl;
+                     }
                  }
             }
         }
-
-
-
-
-
 
 int main() {
     std::cout << "hi" << std::endl;
