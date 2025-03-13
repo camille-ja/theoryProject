@@ -98,16 +98,16 @@ class Grammar{
         for(int i = 0; i < tempLine.size(); i++){
             string symbol = tempLine.substr(i,1); //Saves the substring of the index we're looking at
             if(symbol != "," && symbol != " "){ //Saves the symbol to the vector if it's not a comma or space
-                variables.insert(variables.begin(), symbol);
+                variables.insert(variables.end(), symbol);
             }
         }
 
         cout << "Variables: ";
         //Prints out the variables in order
-        for(int i = variables.size() - 1; i > 0; i--){
+        for(int i = 0; i < variables.size() - 1; i++){
             cout << variables[i] << ", ";
         }
-        cout << variables[0] << endl;
+        cout << variables[variables.size() - 1] << endl;
 
         getline(fin, tempLine);
         vector <string> terminals;
@@ -133,24 +133,24 @@ class Grammar{
             string rules = "";
             getline(fin, rules); //Gets an entire line of the rules of a variable
             if(i == 0){ //If we are reading in the start variable, add a special case to add the epsilon
-                newVariables.insert(newVariables.begin(), Variables(rules.substr(0,1)));
+                newVariables.insert(newVariables.end(), Variables(rules.substr(0,1)));
             } //Reads in normal variables and sets the name as what was read in
             else{
-                newVariables.insert(newVariables.begin(), Variables(rules.substr(0,1)));
+                newVariables.insert(newVariables.end(), Variables(rules.substr(0,1)));
             }
             int m = 0; //acts as the index for the index of the rules string we're looking at
             int n = rules.length();
             while(m < n){ //loops untill we've looked at every index of rules
                 if(rules.substr(0, 1) == ">" || rules.substr(0, 1) == "|"){ //If we've found one of these symbols, there's a terminal after it
-                    string temp = rules.substr(2, rules.length());
+                string temp = rules.substr(2, rules.length());
                    string newTemp = temp.substr(0, temp.find(" "));
                    if(newTemp == "e"){
-                       newVariables[0].setEpsilon();
+                       newVariables[i].setEpsilon();
                    }
-                   if(!newVariables[0].hasLeft()){
-                       newVariables[0].setLeft(newTemp);
-                   } else if(!newVariables[0].hasRight()) {
-                       newVariables[0].setRight(newTemp);
+                   if(!newVariables[i].hasLeft()){
+                       newVariables[i].setLeft(newTemp);
+                   } else if(!newVariables[i].hasRight()) {
+                       newVariables[i].setRight(newTemp);
                    }
                }
                m++;
@@ -160,8 +160,10 @@ class Grammar{
 
 
         cout << "Rules: " << endl;
+        cout<< newVariables.size() << endl;
+        cout << newVariables[1].getVariable() << endl;
         //Prints out the rules in order. If the variable doesn't have a left, right, or epsilon, nothing is printed for that category
-        for(int i = newVariables.size() - 1; i >= 0; i--){
+        for(int i = 0; i < newVariables.size(); i++){
             if(newVariables[i].hasLeft()){
                 cout << newVariables[i].getVariable() <<  " -> " << newVariables[i].getLeft() << endl;
             }
@@ -172,13 +174,14 @@ class Grammar{
                 cout << newVariables[i].getVariable() <<  " -> " << "e" << endl;
             }
         }
-        cout << "Start Varaiable: " << newVariables[newVariables.size() - 1].getVariable() << endl;
+        cout << "Start Variable: " << newVariables[0].getVariable() << endl;
 
        ifstream newFin;
        newFin.open(inputFile);
        if(newFin.fail()){
            cerr << "Files not found" <<endl;
        }
+       while(newFin.eof() == 0){
        string inputLine = "";
        getline(newFin, inputLine);
 
@@ -189,25 +192,46 @@ class Grammar{
            } else {
                cout << "Reject" << endl;
            }
+        } else {
+
+
+                int numRows = inputLine.length();
+                int numCols = 2 * inputLine.length() - 1;
+
+                vector<vector<Variables>> table(numRows, vector<Variables>(numCols, Variables("--")));
+
+                // Resize the 2D vector
+                //table.resize(numRows, vector<Variables>(numCols));
+
+                // Initialize elements
+
+                for(int i = 0; i < inputLine.length() - 1; i++){
+                    string w = inputLine.substr(i, i + 1);
+                        for(int j = 0; j < newVariables.size(); j++){
+                            if(newVariables[j].getLeft() == w || newVariables[j].getRight() == w){
+                                table[i][j] = newVariables[j].getVariable();
+                            }
+                        }
+                    }
+                }
+                 for(int l = 1; l < inputLine.length(); l++){
+                     for(int i = 0; i < inputLine.length() - l + 1; i++){
+                         int j = i + l - 1;
+                         for(int k = i; k < j - 1; k++){
+                             if(newVariables[k].getLeft().length() == 2){
+                                 string var = newVariables[k].getLeft().substr(0,1); // 10 isolated first variable within the string
+                                 for(int r = k + 1; r < newVariables.size(); r++){
+                                    if(var == newVariables[r].getVariable()){
+                                        
+                                    }
+                                }
+                             }
+                         }
+                     }
+                 }
+            }
         }
 
-        // for(int i = 0; i < inputLine.length(); i++){
-            // for(int j = 0; j < newVariables.size(); j++){
-                int arr[inputLine.length()][2 * inputLine.length() - 1];
-                for(int i = 0; i < inputLine.length() + 1; i ++){
-                    for(int j = 0; j < 2 * inputLine.length(); j++){
-                        arr[i][j] = 0;
-                    }
-                }
-                for(int i = 0; i < inputLine.length() + 1; i ++){
-                    for(int j = 0; j < 2 * inputLine.length(); j++){
-                        cout << arr[i][j] << endl;
-                    }
-                }
-            // }
-        // }
-
-       }
 
 
 
