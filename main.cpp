@@ -34,7 +34,7 @@ class Variables{
     bool hasLeft();
     //Returns true if the variable has a right child, false otherwise
     bool hasRight();
-    // add later
+    // this sets the variable to have an epsilon terminal
     void setEpsilon();
     }; //end of class definition
     
@@ -77,6 +77,7 @@ class Grammar{
         void read();
 };
     void Grammar:: read(){
+        //store the files names into a string for easier access. also makes it easier to evaulate different files since we would only have to make changes here and not throughout the code
         string descriptionFile = "astarGrammar.txt";
         string inputFile = "astarGrammarInput.txt";
         //cin >> descriptionFile; 
@@ -85,6 +86,7 @@ class Grammar{
 
         //Opens an inputstream to read the description file
         ifstream fin;
+        //if we cannot open the file, we send an error message
         fin.open(descriptionFile);
         if(fin.fail()){
             cerr << "Files not found" <<endl;
@@ -107,8 +109,10 @@ class Grammar{
         for(int i = 0; i < variables.size() - 1; i++){
             cout << variables[i] << ", ";
         }
+        //we have to print out the last variable seperately since we dont want a comma behind the last variable 
         cout << variables[variables.size() - 1] << endl;
 
+        //we know this next line is termals, so we extract that line
         getline(fin, tempLine);
         vector <string> terminals;
         //Saves the terminals to a vector
@@ -124,6 +128,7 @@ class Grammar{
         for(int i = terminals.size() - 1; i > 0; i--){
             cout << terminals[i] << ", ";
         }
+        //we have to print out the last terminal seperately since we dont want a comma behind the last terminal 
         cout << terminals[0] << endl;
 
         //This loop will addvariables of type Variable to a vector
@@ -142,14 +147,14 @@ class Grammar{
             int n = rules.length();
             while(m < n){ //loops untill we've looked at every index of rules
                 if(rules.substr(0, 1) == ">" || rules.substr(0, 1) == "|"){ //If we've found one of these symbols, there's a terminal after it
-                string temp = rules.substr(2, rules.length());
-                   string newTemp = temp.substr(0, temp.find(" "));
-                   if(newTemp == "e"){
+                string temp = rules.substr(2, rules.length()); //make a substring behind either one of those symbols
+                   string newTemp = temp.substr(0, temp.find(" ")); //now make a substring beginning from behind one of those symbols until we reach a space. this will successfully extract the terminal
+                   if(newTemp == "e"){ //set the variable to have an epsilon is the rule includes an epsilon
                        newVariables[i].setEpsilon();
                    }
-                   if(!newVariables[i].hasLeft()){
+                   if(!newVariables[i].hasLeft()){ //if it does not already have a left, we set it to be the extracted terminal
                        newVariables[i].setLeft(newTemp);
-                   } else if(!newVariables[i].hasRight()) {
+                   } else if(!newVariables[i].hasRight()) {  //if it does not already have a right, we set it to be the extracted terminal
                        newVariables[i].setRight(newTemp);
                    }
                }
@@ -186,6 +191,7 @@ class Grammar{
        getline(newFin, inputLine);
 
        cout << inputLine << ": ";
+       //if the string is empty, meaning it is epsilon, we want to check if the variable accepts epsilon
        if(inputLine == ""){
            if (newVariables[newVariables.size() - 1].hasEpsilon()){
                cout << "Accept" << endl;
