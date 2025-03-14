@@ -191,6 +191,7 @@ class Grammar{
        while(newFin.eof() == 0){
        string inputLine = "";
        getline(newFin, inputLine);
+       cout << "-----------------------------" << endl;
 
        cout << inputLine << ": ";
        //if the string is empty, meaning it is epsilon, we want to check if the variable accepts epsilon
@@ -201,53 +202,133 @@ class Grammar{
                cout << "Reject" << endl;
            }
         } else {
-                int numRows = inputLine.length();
-                int numCols = 3 * inputLine.length() - 1;
-
-                vector<vector<Variables>> table(numRows, vector<Variables>(numCols, Variables("--")));
-
-                // Resize the 2D vector
-                //table.resize(numRows, vector<Variables>(numCols));
-
-                // Initialize elements
+            int numRows = 300 * inputLine.length();
+            int numCols = 500 * inputLine.length() - 1;
 
 
-                for(int i = 0; i < inputLine.length(); i++){
-                    string w = inputLine.substr(i, i + 1);
-                        for(int j = 0; j < newVariables.size(); j++){
-                            if(newVariables[j].getLeft() == w || newVariables[j].getRight() == w){
-                               //cout << "variable: " << newVariables[j].getVariable() << endl;
-                                table[i][i].setVariable(newVariables[j].getVariable());
+            vector<vector<string>> table(numRows, vector<string>(numCols, ""));   
+            cout << " " << endl;         
+            
 
+            // Resize the 2D vector
+            //table.resize(numRows, vector<Variables>(numCols));
+
+            // Initialize elements
+            bool tOne = false;
+            bool tTwo = false;
+
+            //LINES 2-5
+            for(int i = 0; i < inputLine.length(); i++){ //examine each substring of length 1
+                string w = inputLine.substr(i, i + 1); //substring of length 1
+                for(int j = 0; j < newVariables.size(); j++){ //for each varaible A
+                    if(newVariables[j].getLeft() == w || newVariables[j].getRight() == w){ //test if A -> wi is a rule
+                            table[i][i].append(newVariables[j].getVariable()); //if so, place A in table
+                        }
+                    }
+            }
+            // for(int i = 0; i < inputLine.length(); i++){
+            //     cout << i << " " << table[i][i] << endl;
+            // }
+
+            //PROBLEM:: we think l is wrong bc when aa is read, it doesn't go through the loop but because we're putting the variables in A(i,i) we couldn't
+            //put it in A(0,n) bc n is 2. So we're interpreting how to put variables in the table (we do this at line 220-226) wrong or we're interpreting how to look for S wrong (we do this at line 317ish)- the book's line 2-5/ line 12
+            //second problem: we don't know if our first problem is affecting our main loop (the book's line 7-11). but it's not working 
+            for(int l = 2; l <= inputLine.length() - 1; l++){ //line 6
+                for(int i = 0; i <= inputLine.length() - l; i++){ //line 7
+                    int j = i + l - 1; //line 8
+                    for(int k = i; k <= j - 1; k++){ //line 9
+                        for(int u = 0; u < newVariables.size(); u++){ //line 10
+                            //cout << k << endl;
+                            //cout << "test left " << newVariables[u].getVariable() << " " << newVariables[u].getLeft() << " " << newVariables[u].getLeft().length() << endl;
+
+                            if(newVariables[u].getLeft().length() == 2){
+                                string var = newVariables[u].getLeft().substr(0,1); //first variable
+                                string var2 = newVariables[u].getLeft().substr(1,2); //second variable
+                                string f = table[i][k]; //string in the table
+                                int b = 0;
+                                while(b < f.length() && !tOne){
+                                    //cout << "looping " << var << " f:" << f.substr(b,b+1) << " " << f << endl;
+                                    if(f.substr(b, b + 1) == var){
+                                        //cout << "this works " << tOne << endl;
+                                        tOne = true;
+
+                                        int nn = table.size();
+
+                                        //cout << nn << endl;
+                                        //[k + 1][j];
+                                        string c = table[k + 1][j]; //problem: c is empty
+                                        //cout << c << endl;
+                                        int g = 0;
+                                        //cout << c.length() << endl;
+                                        while(g < c.length() && !tTwo){
+                                            //cout << "in loop" << endl;
+                                            //cout << c.substr(0,1) << var2 << endl;
+                                            // if(c.substr(g,g+ 1) == var2){
+                                            //     tTwo = true;
+                                            //     //cout << "1" << endl;
+                                            // }
+                                            g++;
+                                            //cout << "end looop" << endl;
+                                        }
+                                    }
+                                    b++;
+                                }
+                                if(tOne && tTwo){ //line 11
+                                    table[i][j].append(newVariables[u].getVariable());
+                                }
                             }
+
+                            if(newVariables[u].getRight().length() == 2){ //line 10 (for the right)
+                                    string var = newVariables[u].getRight().substr(0,1); //first variable
+                                    string var2 = newVariables[u].getRight().substr(1,2); //second variable
+                                    string f = table[i][k]; //string in the table
+                                    int b = 0;
+                                    while(b < f.length() && !tOne){
+                                        if(f.substr(b, b + 1) == var){
+                                            tOne = true;
+                                            string c = table[k + 1][j];
+                                            int g = 0;
+
+                                            while(g < c.length() && !tTwo){
+                                                if(c.substr(g, g+ 1) == var2){
+                                                    tTwo = true;
+                                                }
+                                                g++;
+                                            }
+                                        }
+                                        b++;
+                                    }
+                                    if(tOne && tTwo){ //line 11 (for the right)
+                                        table[i][j].append(newVariables[u].getVariable());
+                                    }
+                                }
                         }
                 }
-
-                for(int l = 1; l < inputLine.length() - 1; l++){
-                     for(int i = 0; i < inputLine.length() - 1; i++){
-                         int j = i + l - 1;
-                         for(int k = i; k < j - 1; k++){
-                             if(newVariables[k].getLeft().length() == 2){
-                                 string var = newVariables[k].getLeft().substr(0,1);
-                                    if(table[i][k].getVariable() == var){
-                                        string var2 = newVariables[k].getLeft().substr(1,2);
-                                        if(table[k + 1][j].getVariable() == var2){
-                                            table[i][j] = newVariables[k];
-                                        }
-                                    } 
-                                }
-                             }
-                         }
-                     }
-                    //cout << " bottom if " << table[0][inputLine.length() - 1].getVariable() << endl;
-                     if(table[0][inputLine.length() - 1].getVariable() == newVariables[0].getVariable()){
+            }
+        
+        }
+    
+    
+                    //loop through table?
+                    //line 12
+                    bool hasS = false;
+                    cout << table[0][inputLine.length() -1] << endl;
+                    string f =  table[0][inputLine.length() - 1];
+                    for(int i = 0; i < f.length(); i++){
+                        if(f.substr(i, i + 1) == newVariables[0].getVariable()){
+                            hasS = true;
+                        }
+                    }
+                    if(hasS){
                         cout << "Accept" << endl;
-                     } else {
+                    } else {
                         cout << "Reject" << endl;
-                     }
-                 }
+                    }
             }
         }
+       cout << "-----------------------------" << endl;
+
+    }
 
 int main() {
     std::cout << "hi" << std::endl;
