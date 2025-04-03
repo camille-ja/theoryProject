@@ -163,7 +163,7 @@ class Grammar{
                    }
                }
                m++;
-               rules = rules.substr(1, rules.length());
+               rules = rules.substr(1, rules.length()); //might be wrong
            }
        }
 
@@ -188,7 +188,10 @@ class Grammar{
        if(newFin.fail()){
            cerr << "Files not found" <<endl;
        }
-       while(newFin.eof() == 0){
+       int b= 0;
+       while(b < 8){
+        b++;
+       //while(newFin.eof() == 0){
        string inputLine = "";
        getline(newFin, inputLine);
        cout << "-----------------------------" << endl;
@@ -219,56 +222,37 @@ class Grammar{
 
             //LINES 2-5
             for(int i = 0; i < inputLine.length(); i++){ //examine each substring of length 1
-                string w = inputLine.substr(i, i + 1); //substring of length 1
+                string w = inputLine.substr(i, 1); //substring of length 1
                 for(int j = 0; j < newVariables.size(); j++){ //for each varaible A
                     if(newVariables[j].getLeft() == w || newVariables[j].getRight() == w){ //test if A -> wi is a rule
+                            cout << i << ": " << newVariables[j].getVariable() << " " << " goes to " << w << endl;
                             table[i][i].append(newVariables[j].getVariable()); //if so, place A in table
                         }
                     }
             }
-            // for(int i = 0; i < inputLine.length(); i++){
-            //     cout << i << " " << table[i][i] << endl;
-            // }
-
-            //PROBLEM:: we think l is wrong bc when aa is read, it doesn't go through the loop but because we're putting the variables in A(i,i) we couldn't
-            //put it in A(0,n) bc n is 2. So we're interpreting how to put variables in the table (we do this at line 220-226) wrong or we're interpreting how to look for S wrong (we do this at line 317ish)- the book's line 2-5/ line 12
-            //second problem: we don't know if our first problem is affecting our main loop (the book's line 7-11). but it's not working 
-            for(int l = 2; l <= inputLine.length() - 1; l++){ //line 6
-                for(int i = 0; i <= inputLine.length() - l; i++){ //line 7
+    
+            for(int l = 2; l <= inputLine.length(); l++){ //line 6
+                for(int i = 0; i <= inputLine.length() - l + 1; i++){ //line 7 **is the +1 a valid position for a substring?
                     int j = i + l - 1; //line 8
-                    for(int k = i; k <= j - 1; k++){ //line 9
-                        for(int u = 0; u < newVariables.size(); u++){ //line 10
-                            //cout << k << endl;
-                            //cout << "test left " << newVariables[u].getVariable() << " " << newVariables[u].getLeft() << " " << newVariables[u].getLeft().length() << endl;
-
-                            if(newVariables[u].getLeft().length() == 2){
+                    cout << "---NEW LOOP---" <<endl;
+                    for(int k = i; k <= j; k++){ //line 9
+                        for(int u = 0; u < newVariables.size(); u++){ //line 10- looks at each rule
+                            if(newVariables[u].getLeft().length() == 2){ //Testing if there's two variables
                                 string var = newVariables[u].getLeft().substr(0,1); //first variable
-                                string var2 = newVariables[u].getLeft().substr(1,2); //second variable
-                                string f = table[i][k]; //string in the table
+                                string var2 = newVariables[u].getLeft().substr(1,1); //second variable
+                                string box1 = table[i][k]; //string in the table
+                                //string box2 = table[k+1][j];
                                 int b = 0;
-                                while(b < f.length() && !tOne){
-                                    //cout << "looping " << var << " f:" << f.substr(b,b+1) << " " << f << endl;
-                                    if(f.substr(b, b + 1) == var){
-                                        //cout << "this works " << tOne << endl;
+                                while(b < box1.length() && !tOne){ //Checking if table (i,k) contains B
+                                    if(box1.substr(b, 1) == var){
                                         tOne = true;
-
-                                        int nn = table.size();
-
-                                        //cout << nn << endl;
-                                        //[k + 1][j];
-                                        string c = table[k + 1][j]; //problem: c is empty
-                                        //cout << c << endl;
+                                        string box2 = table[k+1][j];
                                         int g = 0;
-                                        //cout << c.length() << endl;
-                                        while(g < c.length() && !tTwo){
-                                            //cout << "in loop" << endl;
-                                            //cout << c.substr(0,1) << var2 << endl;
-                                            // if(c.substr(g,g+ 1) == var2){
-                                            //     tTwo = true;
-                                            //     //cout << "1" << endl;
-                                            // }
+                                        while(g < box2.length() && !tTwo){
+                                            if(box2.substr(g, 1) == var2){
+                                                tTwo = true;
+                                            }
                                             g++;
-                                            //cout << "end looop" << endl;
                                         }
                                     }
                                     b++;
@@ -277,20 +261,19 @@ class Grammar{
                                     table[i][j].append(newVariables[u].getVariable());
                                 }
                             }
-
                             if(newVariables[u].getRight().length() == 2){ //line 10 (for the right)
                                     string var = newVariables[u].getRight().substr(0,1); //first variable
-                                    string var2 = newVariables[u].getRight().substr(1,2); //second variable
-                                    string f = table[i][k]; //string in the table
+                                    string var2 = newVariables[u].getRight().substr(1,1); //second variable
+                                    string box1 = table[i][k]; //string in the table
+                                    //string box2 = table[k+1][j];
                                     int b = 0;
-                                    while(b < f.length() && !tOne){
-                                        if(f.substr(b, b + 1) == var){
+                                    while(b < box1.length() && !tOne){
+                                        if(box1.substr(b, 1) == var){
                                             tOne = true;
-                                            string c = table[k + 1][j];
+                                            string box2 = table[k+1][j];
                                             int g = 0;
-
-                                            while(g < c.length() && !tTwo){
-                                                if(c.substr(g, g+ 1) == var2){
+                                            while(g < box2.length() && !tTwo){
+                                                if(box2.substr(g, 1) == var2){
                                                     tTwo = true;
                                                 }
                                                 g++;
