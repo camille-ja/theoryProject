@@ -4,3 +4,4 @@ S -> AX | a | e
 X -> AX | a
 A -> a
 S
+

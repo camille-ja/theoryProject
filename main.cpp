@@ -79,7 +79,7 @@ class Grammar{
     public:
         //Reads the file and parses the grammar
         void read();
-};
+    };
     void Grammar:: read(){
         //store the files names into a string for easier access. also makes it easier to evaulate different files since we would only have to make changes here and not throughout the code
         string descriptionFile = "astarGrammar.txt";
@@ -138,33 +138,42 @@ class Grammar{
         //This loop will addvariables of type Variable to a vector
         vector <Variables> newVariables;
         //Loops for the amount of variables we know we have
-        for(int i = 0; i < variables.size(); i++){
-            string rules = "";
+        int counter = 0;
+        string rules = "";
+
+        while(fin.eof() == 0){
+            rules = "";
             getline(fin, rules); //Gets an entire line of the rules of a variable
-            if(i == 0){ //If we are reading in the start variable, add a special case to add the epsilon
-                newVariables.insert(newVariables.end(), Variables(rules.substr(0,1)));
-            } //Reads in normal variables and sets the name as what was read in
-            else{
-                newVariables.insert(newVariables.end(), Variables(rules.substr(0,1)));
+            cout << rules << endl;
+
+            if(rules.length() > 1){ //If we are still reading a rule
+                if(counter == 0){ //If we are reading in the start variable, add a special case to add the epsilon
+                    newVariables.insert(newVariables.end(), Variables(rules.substr(0,1)));
+                } //Reads in normal variables and sets the name as what was read in
+                else{
+                    newVariables.insert(newVariables.end(), Variables(rules.substr(0,1)));
+                }
+                int m = 0; //acts as the index for the index of the rules string we're looking at
+                int n = rules.length();
+                while(m < n){ //loops untill we've looked at every index of rules
+                    if(rules.substr(0, 1) == ">" || rules.substr(0, 1) == "|"){ //If we've found one of these symbols, there's a terminal after it
+                        string temp = rules.substr(2, rules.length()); //make a substring behind either one of those symbols
+                        string newTemp = temp.substr(0, temp.find(" ")); //now make a substring beginning from behind one of those symbols until we reach a space. this will successfully extract the terminal
+                        if(newTemp == "e"){ //set the variable to have an epsilon is the rule includes an epsilon
+                            newVariables[counter].setEpsilon();
+                        }
+                        if(!newVariables[counter].hasLeft()){ //if it does not already have a left, we set it to be the extracted terminal
+                            newVariables[counter].setLeft(newTemp);
+                        } else if(!newVariables[counter].hasRight()) {  //if it does not already have a right, we set it to be the extracted terminal
+                            newVariables[counter].setRight(newTemp);
+                    }
+                }
+                m++;
+                rules = rules.substr(1, rules.length()); //might be wrong
             }
-            int m = 0; //acts as the index for the index of the rules string we're looking at
-            int n = rules.length();
-            while(m < n){ //loops untill we've looked at every index of rules
-                if(rules.substr(0, 1) == ">" || rules.substr(0, 1) == "|"){ //If we've found one of these symbols, there's a terminal after it
-                string temp = rules.substr(2, rules.length()); //make a substring behind either one of those symbols
-                   string newTemp = temp.substr(0, temp.find(" ")); //now make a substring beginning from behind one of those symbols until we reach a space. this will successfully extract the terminal
-                   if(newTemp == "e"){ //set the variable to have an epsilon is the rule includes an epsilon
-                       newVariables[i].setEpsilon();
-                   }
-                   if(!newVariables[i].hasLeft()){ //if it does not already have a left, we set it to be the extracted terminal
-                       newVariables[i].setLeft(newTemp);
-                   } else if(!newVariables[i].hasRight()) {  //if it does not already have a right, we set it to be the extracted terminal
-                       newVariables[i].setRight(newTemp);
-                   }
-               }
-               m++;
-               rules = rules.substr(1, rules.length()); //might be wrong
-           }
+        }
+        cout << rules << endl;
+        counter++;
        }
 
 
@@ -181,17 +190,15 @@ class Grammar{
                 cout << newVariables[i].getVariable() <<  " -> " << "e" << endl;
             }
         }
-        cout << "Start Variable: " << newVariables[0].getVariable() << endl;
+        cout << "Start Variable: " << rules << endl;
 
        ifstream newFin;
        newFin.open(inputFile);
        if(newFin.fail()){
            cerr << "Files not found" <<endl;
        }
-       int b= 0;
-       while(b < 8){
-        b++;
-       //while(newFin.eof() == 0){
+
+       while(newFin.eof() == 0){
        string inputLine = "";
        getline(newFin, inputLine);
        cout << "-----------------------------" << endl;
@@ -204,44 +211,36 @@ class Grammar{
            } else {
                cout << "Reject" << endl;
            }
-        } else {
+        } 
+        else {
             int numRows = 300 * inputLine.length();
             int numCols = 500 * inputLine.length() - 1;
-
-
             vector<vector<string>> table(numRows, vector<string>(numCols, ""));   
             cout << " " << endl;         
-            
 
-            // Resize the 2D vector
-            //table.resize(numRows, vector<Variables>(numCols));
-
-            // Initialize elements
-            bool tOne = false;
-            bool tTwo = false;
-
-            //LINES 2-5
-            for(int i = 0; i < inputLine.length(); i++){ //examine each substring of length 1
-                string w = inputLine.substr(i, 1); //substring of length 1
-                for(int j = 0; j < newVariables.size(); j++){ //for each varaible A
-                    if(newVariables[j].getLeft() == w || newVariables[j].getRight() == w){ //test if A -> wi is a rule
-                            cout << i << ": " << newVariables[j].getVariable() << " " << " goes to " << w << endl;
-                            table[i][i].append(newVariables[j].getVariable()); //if so, place A in table
+            //Lines 2-5
+            for(int i = 0; i < inputLine.length(); i++){ //Examine each substring of length 1
+                string w = inputLine.substr(i, 1);
+                for(int j = 0; j < newVariables.size(); j++){ //Checking rules of each varaible A
+                    if(newVariables[j].getLeft() == w || newVariables[j].getRight() == w){ //Test if A -> wi is a rule
+                            //cout << i << ": " << newVariables[j].getVariable() << " " << " goes to " << w << endl;
+                            table[i][i].append(newVariables[j].getVariable()); //If so, place A in table
                         }
                     }
             }
     
             for(int l = 2; l <= inputLine.length(); l++){ //line 6
-                for(int i = 0; i <= inputLine.length() - l + 1; i++){ //line 7 **is the +1 a valid position for a substring?
+                for(int i = 0; i <= inputLine.length() - l; i++){ //line 7
                     int j = i + l - 1; //line 8
-                    cout << "---NEW LOOP---" <<endl;
+                    //cout << "---NEW LOOP--->" << j <<endl;
                     for(int k = i; k <= j; k++){ //line 9
                         for(int u = 0; u < newVariables.size(); u++){ //line 10- looks at each rule
+                            bool tOne = false;
+                            bool tTwo = false;
                             if(newVariables[u].getLeft().length() == 2){ //Testing if there's two variables
                                 string var = newVariables[u].getLeft().substr(0,1); //first variable
                                 string var2 = newVariables[u].getLeft().substr(1,1); //second variable
-                                string box1 = table[i][k]; //string in the table
-                                //string box2 = table[k+1][j];
+                                string box1 = table[i][k]; //string in the table                                
                                 int b = 0;
                                 while(b < box1.length() && !tOne){ //Checking if table (i,k) contains B
                                     if(box1.substr(b, 1) == var){
@@ -259,6 +258,8 @@ class Grammar{
                                 }
                                 if(tOne && tTwo){ //line 11
                                     table[i][j].append(newVariables[u].getVariable());
+                                    //cout << "TABLE1 " << table[0][0] << endl;
+                                    //cout << "added " << newVariables[u].getVariable() << " to " << i <<", " << j << ": " << k << endl;
                                 }
                             }
                             if(newVariables[u].getRight().length() == 2){ //line 10 (for the right)
@@ -267,6 +268,8 @@ class Grammar{
                                     string box1 = table[i][k]; //string in the table
                                     //string box2 = table[k+1][j];
                                     int b = 0;
+                                    tOne = false;
+                                    tTwo = false;
                                     while(b < box1.length() && !tOne){
                                         if(box1.substr(b, 1) == var){
                                             tOne = true;
@@ -283,6 +286,10 @@ class Grammar{
                                     }
                                     if(tOne && tTwo){ //line 11 (for the right)
                                         table[i][j].append(newVariables[u].getVariable());
+                                        //cout << "TABLE " << table[0][0] << endl;
+
+                                        //cout << "added " << newVariables[u].getVariable() << " to " << i <<", " << j << endl;
+
                                     }
                                 }
                         }
@@ -295,10 +302,12 @@ class Grammar{
                     //loop through table?
                     //line 12
                     bool hasS = false;
-                    cout << table[0][inputLine.length() -1] << endl;
+                    //cout << table[1][inputLine.length() -1] << endl;
+                    //cout << table[0][inputLine.length() -1] << endl;
+                    //cout << inputLine.length() - 1 << endl;
                     string f =  table[0][inputLine.length() - 1];
                     for(int i = 0; i < f.length(); i++){
-                        if(f.substr(i, i + 1) == newVariables[0].getVariable()){
+                        if(f.substr(i, 1) == "S"){
                             hasS = true;
                         }
                     }
@@ -310,7 +319,6 @@ class Grammar{
             }
         }
        cout << "-----------------------------" << endl;
-
     }
 
 int main() {
