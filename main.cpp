@@ -93,7 +93,12 @@ class Grammar{
         //if we cannot open the file, we send an error message
         fin.open(descriptionFile);
         if(fin.fail()){
-            cerr << "Files not found" <<endl;
+            cerr << "Grammar file not found" <<endl;
+        }
+        ifstream newFin;
+        newFin.open(inputFile);
+        if(newFin.fail()){
+           cerr << "Input file not found" <<endl;
         }
         //Saves the first line of the description file to temp variable
         string tempLine = "";
@@ -140,13 +145,14 @@ class Grammar{
         //Loops for the amount of variables we know we have
         int counter = 0;
         string rules = "";
+        bool doneReading = false;
 
-        while(fin.eof() == 0){
+        while(fin.eof() == 0 && !doneReading){
             rules = "";
             getline(fin, rules); //Gets an entire line of the rules of a variable
-            cout << rules << endl;
 
             if(rules.length() > 1){ //If we are still reading a rule
+                cout << rules << endl;
                 if(counter == 0){ //If we are reading in the start variable, add a special case to add the epsilon
                     newVariables.insert(newVariables.end(), Variables(rules.substr(0,1)));
                 } //Reads in normal variables and sets the name as what was read in
@@ -172,7 +178,9 @@ class Grammar{
                 rules = rules.substr(1, rules.length()); //might be wrong
             }
         }
-        cout << rules << endl;
+        else{
+            doneReading = true;
+        }
         counter++;
        }
 
@@ -191,24 +199,16 @@ class Grammar{
             }
         }
         cout << "Start Variable: " << rules << endl;
+        while(newFin.eof() == 0){
+        string inputLine = "";
+        getline(newFin, inputLine);
 
-       ifstream newFin;
-       newFin.open(inputFile);
-       if(newFin.fail()){
-           cerr << "Files not found" <<endl;
-       }
-
-       while(newFin.eof() == 0){
-       string inputLine = "";
-       getline(newFin, inputLine);
-       cout << "-----------------------------" << endl;
-
-       cout << inputLine << ": ";
-       //if the string is empty, meaning it is epsilon, we want to check if the variable accepts epsilon
-       if(inputLine == ""){
-           if (newVariables[0].hasEpsilon()){
+        cout << inputLine << ": ";
+        //if the string is empty, we want to check if the variable accepts epsilon
+        if(inputLine == ""){
+            if (newVariables[0].hasEpsilon()){
                cout << "Accept" << endl;
-           } else {
+            } else {
                cout << "Reject" << endl;
            }
         } 
@@ -258,15 +258,12 @@ class Grammar{
                                 }
                                 if(tOne && tTwo){ //line 11
                                     table[i][j].append(newVariables[u].getVariable());
-                                    //cout << "TABLE1 " << table[0][0] << endl;
-                                    //cout << "added " << newVariables[u].getVariable() << " to " << i <<", " << j << ": " << k << endl;
                                 }
                             }
                             if(newVariables[u].getRight().length() == 2){ //line 10 (for the right)
                                     string var = newVariables[u].getRight().substr(0,1); //first variable
                                     string var2 = newVariables[u].getRight().substr(1,1); //second variable
                                     string box1 = table[i][k]; //string in the table
-                                    //string box2 = table[k+1][j];
                                     int b = 0;
                                     tOne = false;
                                     tTwo = false;
@@ -286,43 +283,35 @@ class Grammar{
                                     }
                                     if(tOne && tTwo){ //line 11 (for the right)
                                         table[i][j].append(newVariables[u].getVariable());
-                                        //cout << "TABLE " << table[0][0] << endl;
-
-                                        //cout << "added " << newVariables[u].getVariable() << " to " << i <<", " << j << endl;
-
                                     }
-                                }
                         }
+                    }
                 }
             }
-        
         }
-    
-    
-                    //loop through table?
-                    //line 12
-                    bool hasS = false;
-                    //cout << table[1][inputLine.length() -1] << endl;
-                    //cout << table[0][inputLine.length() -1] << endl;
-                    //cout << inputLine.length() - 1 << endl;
-                    string f =  table[0][inputLine.length() - 1];
-                    for(int i = 0; i < f.length(); i++){
-                        if(f.substr(i, 1) == "S"){
-                            hasS = true;
-                        }
-                    }
-                    if(hasS){
-                        cout << "Accept" << endl;
-                    } else {
-                        cout << "Reject" << endl;
-                    }
+            //loop through table?
+            //line 12
+            bool hasS = false;
+            //cout << table[1][inputLine.length() -1] << endl;
+            //cout << table[0][inputLine.length() -1] << endl;
+            //cout << inputLine.length() - 1 << endl;
+            string f =  table[0][inputLine.length() - 1];
+            for(int i = 0; i < f.length(); i++){
+                if(f.substr(i, 1) == "S"){
+                    hasS = true;
+                }
+            }
+            if(hasS){
+                cout << "Accept" << endl;
+            } 
+            else {
+                cout << "Reject" << endl;
             }
         }
-       cout << "-----------------------------" << endl;
     }
+}
 
 int main() {
-    std::cout << "hi" << std::endl;
     Grammar().read();
     return 0;
 }
@@ -330,11 +319,3 @@ int main() {
     g++ main.cpp -o main
 ./main */
 
-/*It should take two command line arguments. 
-
-The program should be able to read and “parse” the grammar; what I mean by this is that it should be able to identify what the variables, terminals, 
-rules, and start variable of the grammar are. Your program should print out all of this info (see below for the format of this output).
-
-The program should go through each string in the second file and print out whether that string is generated by the grammar. 
-It should use the algorithm described in Sipser to do this. If you use any other algorithm/approach to test membership, you will not receive any credit.
-*/

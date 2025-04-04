@@ -1,0 +1,9 @@
+S, A, J, B, K
+b, a, e
+S -> AJ | BK | a | b | AA | BB | e
+X → AJ | BK | a | b | AA| BB
+J -> Xa
+K -> Xb
+A -> a
+B -> b
+S
