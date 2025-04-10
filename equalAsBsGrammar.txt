@@ -1,0 +1,9 @@
+S, A, B, C, D, X
+a, b, e
+S -> AC | BD | XX | AB | BA | e
+X -> AC | BC
+C -> XB
+B -> b
+A -> a
+D -> XA
+S

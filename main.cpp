@@ -9,70 +9,51 @@ using namespace std; //allows us to make print statements without having to keep
 class Variables{
     //intializes string and boolean variables
     string name = "-"; 
-    string left = "-";
-    string right = "-";
-    bool rightExists = false;
-    bool leftExists = false;
+    vector<string> terminals;
+    bool terminalExists = false;
     bool epsilon = false;
+    bool rightT = false; //true if the right variable is a terimnal
+    bool leftT = false; //true if left variable is a terminal
     //Initializes a new variable
     public:
     Variables(string n){
         name = n;
         }
-    //Returns the terminal on the left
-    string getLeft();
-    //Returns the terminal on the right
-    string getRight();
-    //Returns if the varaible is the start variable or not
+    //Returns the terminals
+    vector<string> getTerminals();
     bool hasEpsilon();
-    //Sets the left terminal
-    void setLeft(string l);
-    //Sets the right terminal
-    void setRight(string r);
+    //Sets a terminal
+    void setTerminal(string t);
     //Gets the varible
     string getVariable();
     //Returns true if the variable has a left child, false otherwise
-    bool hasLeft();
-    //Returns true if the variable has a right child, false otherwise
-    bool hasRight();
-    // this sets the variable to have an epsilon terminal
+    bool hasTerminal();
     void setEpsilon();
     //sets the variable to have string v
     void setVariable(string v);
     }; //end of class definition
     //Returns the terminal on the left
-    string Variables::getLeft(){
-        return left;       
+    vector<string> Variables::getTerminals(){
+        //cout << "hi" << terminalExists << endl;
+        return terminals;       
     }
-    //Returns the terminal on the right
-    string Variables::getRight(){
-        return right;
-    }  
+ 
     //Returns if the varaible is the start variable or not
     bool Variables::hasEpsilon(){
         return epsilon;
     }
      //Sets the left terminal
-    void Variables::setLeft(string l){
-        left = l;
-        leftExists = true;
-    }
-    //Sets the right terminal
-    void Variables::setRight(string r){
-        right = r;
-        rightExists = true;
+    void Variables::setTerminal(string t){
+        terminals.insert(terminals.end(), t);
+        terminalExists = true;
     }
       //Gets the varible
     string Variables::getVariable(){
         return name;
     }
     //Returns true if the variable has a left child, false otherwise
-    bool Variables::hasLeft(){
-        return leftExists;
-    }
-     //Returns true if the variable has a right child, false otherwise
-    bool Variables::hasRight(){
-        return rightExists;
+    bool Variables::hasTerminal(){
+        return terminalExists;
     }
     // this sets the variable to have an epsilon terminal
     void Variables::setEpsilon(){
@@ -98,8 +79,8 @@ class Grammar{
     */
     void Grammar:: read(){
         //store the files names into a string for easier access. also makes it easier to evaulate different files since we would only have to make changes here and not throughout the code
-        string descriptionFile = "astarGrammar.txt"; //stores the grammar description file to be string easier accessiblilty
-        string inputFile = "astarGrammarInput.txt"; //stores the input file name as a string for easier accessiblilty
+        string descriptionFile = "anbGrammar.txt"; //stores the grammar description file to be string easier accessiblilty
+        string inputFile = "anbGrammarInput.txt"; //stores the input file name as a string for easier accessiblilty
         cout << "c++ CFGTest " << descriptionFile << " " << inputFile << endl; //this will print out the first line in the expected output, which indicates what the program is coded in, CFGTest, and the description and input file names
 
         //Opens an inputstream to read the description file and store as fin
@@ -171,7 +152,7 @@ class Grammar{
             getline(fin, rules); //Gets an entire line of the rules of a variable
 
             if(rules.length() > 1){ //If we are still reading a rule
-                cout << rules << endl; //print out the rule
+                //cout <<  "RULES: " << rules << endl; //print out the rule
                 if(counter == 0){ //If we are reading in the start variable, add a special case to add the epsilon
                     newVariables.insert(newVariables.end(), Variables(rules.substr(0,1)));
                 } //Reads in normal variables and sets the name as what was read in
@@ -181,18 +162,17 @@ class Grammar{
                 }
                 int m = 0; //acts as the index for the index of the rules string we're looking at
                 int n = rules.length(); // n is the length of the string of the rules line
-                while(m < n){ //loops untill we've looked at every index of rules
+                while(m < n){
+                    //cout << "------NEW LOOP--------" <<endl;
+                    //loops untill we've looked at every index of rules
+                    
                     if(rules.substr(0, 1) == ">" || rules.substr(0, 1) == "|"){ //If we've found one of these symbols, there's a terminal or variable after it
                         string temp = rules.substr(2, rules.length()); //make a substring behind either one of those symbols
                         string newTemp = temp.substr(0, temp.find(" ")); //now make a substring beginning from behind one of those symbols until we reach a space. this will successfully extract the terminal
                         if(newTemp == "e"){ //set the variable to have an epsilon is the rule includes an epsilon
                             newVariables[counter].setEpsilon();
                         }
-                        if(!newVariables[counter].hasLeft()){ //if it does not already have a rule on the left, we set it to be the extracted terminal
-                            newVariables[counter].setLeft(newTemp);
-                        } else if(!newVariables[counter].hasRight()) {  //if it does not already have a rule on the right , we set it to be the extracted terminal
-                            newVariables[counter].setRight(newTemp);
-                    }
+                        newVariables[counter].setTerminal(newTemp);
                 }
                 m++; //increment m 
                 rules = rules.substr(1, rules.length()); //decreases rules length by one so we can evaluate more rules
@@ -208,20 +188,22 @@ class Grammar{
         cout << "Rules: " << endl;
         //Prints out the rules in order. If the variable doesn't have a left, right, or epsilon, nothing is printed for that category
         for(int i = 0; i < newVariables.size(); i++){ //we are looping through the entirity of our newVariables size, since each variable has a rule
-            if(newVariables[i].hasLeft()){ //if the variable has a left terminal, we print the variable followed by an arrow followed by its left terminal
-                cout << newVariables[i].getVariable() <<  " -> " << newVariables[i].getLeft() << endl;
+            //cout << newVariables[i].getVariable() << "<-- looking at " << endl;
+            vector<string> terminalss = newVariables[i].getTerminals();
+            for(int qq = 0; qq < terminalss.size(); qq++){
+                cout << newVariables[i].getVariable() <<  " -> " << terminalss[qq] << endl;
             }
-            if(newVariables[i].hasRight()){ //if the variable has a right terminal, we print the variable followed by an arrow followed by its right terminal
-                cout << newVariables[i].getVariable() <<  " -> " << newVariables[i].getRight() <<endl;
-            }
-            if(newVariables[i].hasEpsilon()){ //if the variable has an epsilon terminal, we print the variable followed by an arrow followed an e to indicate epsilon
+            /*if(newVariables[i].hasEpsilon()){ //if the variable has an epsilon terminal, we print the variable followed by an arrow followed an e to indicate epsilon
                 cout << newVariables[i].getVariable() <<  " -> " << "e" << endl;
-            }
+            }*/
         }
         //this indicates that we are printing out start variable
         //we stored our last line as rules, which is where the start variable is stored
         cout << "Start Variable: " << rules << endl;
-        //while we our input file is not empty
+        //read while the input file is not empty
+      //  int ww = 0;
+        //while(ww < 2){
+          //  ww++;
         while(newFin.eof() == 0){
             string inputLine = ""; //Holds the line that's being processed
             getline(newFin, inputLine); //update that string to be the next line in the input file
@@ -239,85 +221,107 @@ class Grammar{
                 int numRows = 300 * inputLine.length(); // we are going to intialize rows and columns for our table. this is kind of a large table but we didn't want to end up with an error due to our table being too small
                 int numCols = 500 * inputLine.length() - 1;
                 vector<vector<string>> table(numRows, vector<string>(numCols, "")); //this is the table that the rules will be inputted in
-                cout << " " << endl;         
+                //cout << " " << endl;         
 
                 //Lines 2-5
                 for(int i = 0; i < inputLine.length(); i++){ //Examine each substring of length 1
+                   // cout << "new substring----" << endl;
                     string w = inputLine.substr(i, 1); //extracts each character from the input line
                     for(int j = 0; j < newVariables.size(); j++){ //Checking rules of each variable A
-                        if(newVariables[j].getLeft() == w || newVariables[j].getRight() == w){ //Test if A -> w_i is a rule
-                            table[i][i].append(newVariables[j].getVariable()); //If so, place A in table
+                        vector<string> terminalss = newVariables[j].getTerminals();
+                        for(int q = 0; q < terminalss.size(); q++){
+                           // cout << newVariables[j].getVariable() << "-->>> " << terminalss[q] << " = " << w << endl;
+                            if(terminalss[q] == w){
+                                table[i][i].append(newVariables[j].getVariable());
+                              //  cout << " added "  << newVariables[j].getVariable()<< " should match " << table[i][i] << " to " << i << ", " << i << endl;
+                            }
                         }
                     }
                 }
                 //sets the length l of substrings to be analyzed, starting from 2 up to the full input length n.
                 for(int l = 2; l <= inputLine.length(); l++){ //line 6
+                    //cout << "NEW LINE----------" << endl;
                     //sets the start index i for substrings of length l to iterate over all such substrings in the input.
+                    
                     for(int i = 0; i <= inputLine.length() - l; i++){ //line 7
+                      //  cout << "newish line" << endl;
+                      //  cout << "this is i " << i <<endl;
                         //calculates the end index `j` of the current substring based on its start index i and length l
                         int j = i + l - 1; //line 8
+                        //cout << i << ", " << j << endl;
                         //iterates over all possible split positions `k` within the current substring from `i` to `j - 1`.
                         for(int k = i; k <= j; k++){ //line 9
+                        //    cout << "this is k " << k <<endl;
+
                             //checks each grammar rule of the form A → BC to find possible variable combinations.
+                            
                             for(int u = 0; u < newVariables.size(); u++){ //line 10 looks at each rule
-                                bool tOne = false; //checking if if table(i, k) contains B
-                                bool tTwo = false; //checking if table(k + 1, j) contains C
-                                if(newVariables[u].getLeft().length() == 2){ //Testing if there's two variables
-                                    string var = newVariables[u].getLeft().substr(0,1); //first variable
-                                    string var2 = newVariables[u].getLeft().substr(1,1); //second variable
-                                    string box1 = table[i][k]; //string in the table                                
-                                    int b = 0; //set a counter
-                                    while(b < box1.length() && !tOne){ //Checking if table (i,k) contains B
-                                        if(box1.substr(b, 1) == var){ //if the first character in box1 is the first variable
-                                            tOne = true; //table(i, k) contains B
-                                            string box2 = table[k+1][j];//string in the table      
-                                            int g = 0;//initialize a counter
-                                            while(g < box2.length() && !tTwo){
-                                                if(box2.substr(g, 1) == var2){ //Checking if table(k + 1, j) contains C
-                                                    tTwo = true;// table(k + 1, j) contains C
+                          //      cout << "this is u " << u <<endl;
+
+                               
+                            //    cout <<" hello " <<  newVariables[u].getVariable() << endl;
+                                
+                                vector<string> terminalss = newVariables[u].getTerminals();
+                                //cout << "---new here---" <<endl;
+                                for(int qq = 0; qq < terminalss.size(); qq++){
+                                    bool tOne = false; //checking if if table(i, k) contains B
+                                    bool tTwo = false; //checking if table(k + 1, j) contains C
+                                  //  cout << "this is q " << qq <<endl;
+
+                                   // cout << qq <<" " << terminalss.size() << endl;
+                                    if(terminalss[qq].length() == 2){
+                                        //cout << " looking at " << terminalss[qq] << endl;
+                                        string var = terminalss[qq].substr(0,1); //first variable
+                                        string var2 = terminalss[qq].substr(1,1); //second variable
+                                        string box1 = table[i][k];
+                                      //  cout << table[1][1] << endl;
+                                        int b = 0; //a counter  
+                                      //  if(i == 1 && k == 1)
+                                        //    cout << "var 1: " << var << " var2: " << var2 << " box1:" << box1 << ", i: " << i << ", j: " << j << ", k+1: " << k+1 << endl; 
+
+                                        while(b < box1.length() && !tOne){ //Checking if table (i,k) contains B
+                                           // if(i == 1 && k == 1)
+                                             //   cout << "------- "<< box1.substr(b, 1) << " " << var << endl;
+                                            if(box1.substr(b, 1) == var){ //if the first character in box1 is the first variable
+                                                tOne = true; //table(i, k) contains B
+                                                string box2 = table[k+1][j];//string in the table
+                                               // if(i == 1 && k == 1)
+                                                 //   cout << "^^^^^ " << box2 << endl;    
+                                                //if(i <= 3)
+                                                    //cout << "var 1: " << var << " var2: " << var2 << " box1:" << box1 << " box2 " << box2 << ", i: " << i << ", j: " << j << ", k+1: " << k+1 << endl; 
+                                                  
+                                               // cout << box1.substr(b,1) << " equals " << var << " " << box2 << endl;
+    
+                                                int g = 0;//initialize a counter
+                                           //     cout << "hi " << box2.length() << endl;
+                                              //  cout << box2
+                                                while(g < box2.length() && !tTwo){
+                                                    if(box2.substr(g, 1) == var2){ //Checking if table(k + 1, j) contains C
+                                                        tTwo = true;// table(k + 1, j) contains C
+                                                   ///     cout << box2.substr(g,1) << " equals " << var2 << endl;
+                                                    }
+                                                    g++;//increment g 
                                                 }
-                                                g++;//increment g 
                                             }
+                                            b++;//increment b
                                         }
-                                        b++;//increment b
-                                    }
-                                    if(tOne && tTwo){ //line 11
-                                        table[i][j].append(newVariables[u].getVariable()); //if both are true add variable A to table(i, j) if B is in table(i, k) and C is in table(k + 1, j).
+                                        if(tOne && tTwo){ //line 11
+                                          //  if(i == 1 && k == 1)
+                                            //cout << "var 1: " << var << " var2: " << var2 << " box1:" << box1 << endl;    
+                                        //    cout << " ^^^^^^^^^adding " << newVariables[u].getVariable() << " at " << i << " " << j << endl;
+                                            table[i][j].append(newVariables[u].getVariable()); //if both are true add variable A to table(i, j) if B is in table(i, k) and C is in table(k + 1, j).
+                                        }
                                     }
                                 }
-                                //check the righthand side of the rule
-                                if(newVariables[u].getRight().length() == 2){ //line 10 (for the right)
-                                        string var = newVariables[u].getRight().substr(0,1); //first variable
-                                        string var2 = newVariables[u].getRight().substr(1,1); //second variable
-                                        string box1 = table[i][k]; //string in the table
-                                        int b = 0; //set a counter
-                                        tOne = false; //Checking if table (i,k) contains B
-                                        tTwo = false;//checking if table(k + 1, j) contains C
-                                        while(b < box1.length() && !tOne){  //Checking if table (i,k) contains B
-                                            if(box1.substr(b, 1) == var){//if the first character in box1 is the first variable
-                                                tOne = true;//table(i, k) contains B
-                                                string box2 = table[k+1][j];//string in the table      
-                                                int g = 0;//initialize a counter 
-                                                while(g < box2.length() && !tTwo){
-                                                    if(box2.substr(g, 1) == var2){//Checking if table(k + 1, j) contains C
-                                                        tTwo = true;// table(k + 1, j) contains C
-                                                    }
-                                                    g++;//increment g
-                                                }
-                                            }
-                                            b++; //increment b
-                                        }
-                                        if(tOne && tTwo){ //line 11 (for the right)
-                                            table[i][j].append(newVariables[u].getVariable());//if B is in table(i, k) and C is in table(k + 1, j), add variable A to table(i, j) 
-                                        }
-                            }
                         }
                     }
                 }
             }
                 //line 12
                 bool hasS = false; //accepts the input if the start variable S is in table(1, n); otherwise, it rejects.
+                //cout << inputLine.length() - 1 << endl;
                 string f =  table[0][inputLine.length() - 1]; //initializes f as a string in the table
+                ///cout << "look " << f << endl;
                 for(int i = 0; i < f.length(); i++){ //loop thru the entirety of f
                     if(f.substr(i, 1) == "S"){ //if s is found in f, hasS is true
                         hasS = true;

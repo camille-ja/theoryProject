@@ -1,9 +1,11 @@
-S, A, J, B, K
+S, A, B, J, K, X
 a, b, e
-S -> AJ | AB | e 
-K -> XB 
-X -> AJ 
-J -> Xb 
-A -> a 
+S -> AJ | AB | e
+K -> XB
+X -> CD
+C -> AX
+D -> B
+J -> XB
+A -> a
 B -> b
 S

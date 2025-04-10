@@ -1,20 +1,20 @@
 
 ababababa
-aaaaaaaabbbbaaaaaaaa
+aaabbbabbbaaa
 aaaaaaa
-bbbbaaabbaabbaaabbbb
+bbbbabbbbabbbbabbbb
 b
-bb
-ababbbbbbbbbbbbbbbbbaba
+bab
+ababbbbbbbbbaabbbbbbbbbaba
 a
 bbbabbbabababbbabbb
 ab
 aaaba
 baa
 ababbbbbbbbbbbbbbbbbababbb
-baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaabaaaaa
+baaaaaaaaabaabaaaaa
 aaabbbbaaaabbbbbaaaaabbba
 babababaaa
 aabbaabbaabbaabb
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaba
+aaaaaaaba
 baabababababbbbbbbbbbb
