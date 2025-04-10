@@ -1,7 +1,7 @@
 S, A, B, C, D, X
 a, b, e
 S -> AC | BD | XX | AB | BA | e
-X -> AC | BC
+X -> AC | BC |AB | BA
 C -> XB
 B -> b
 A -> a
