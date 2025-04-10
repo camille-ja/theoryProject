@@ -79,8 +79,10 @@ class Grammar{
     */
     void Grammar:: read(){
         //store the files names into a string for easier access. also makes it easier to evaulate different files since we would only have to make changes here and not throughout the code
-        string descriptionFile = "astarGrammar.txt"; //stores the grammar description file to be string easier accessiblilty
-        string inputFile = "astarGrammarInput.txt"; //stores the input file name as a string for easier accessiblilty
+        string descriptionFile; //stores the grammar description file to be string easier accessiblilty
+        string inputFile; //stores the input file name as a string for easier accessiblilty
+        cin >> descriptionFile;
+        cin >> inputFile;
         cout << "c++ CFGTest " << descriptionFile << " " << inputFile << endl; //this will print out the first line in the expected output, which indicates what the program is coded in, CFGTest, and the description and input file names
 
         //Opens an inputstream to read the description file and store as fin
