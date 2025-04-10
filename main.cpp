@@ -168,7 +168,9 @@ class Grammar{
         }
         //we stored our last line as rules, which is where the start variable is stored
         cout << "\nStart Variable: " << rules << "\n" << endl;
-        //read while the input file is not empty
+        
+        
+        //reads the strings from the input file
         while(newFin.eof() == 0){
             string inputLine = ""; //Holds the line that's being processed
             getline(newFin, inputLine); //update that string to be the next line in the input file
