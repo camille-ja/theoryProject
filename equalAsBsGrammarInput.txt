@@ -8,7 +8,6 @@ bbabaabbbbababaaaa
 aababbbabaab
 bababababbabaabbabaa
 bbabbaababbabbaabaababbaabaa
-REJECT
 a
 bbbababaaab
 aaaaaaaaaaaaaaaaaaaaa
