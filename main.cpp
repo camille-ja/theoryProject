@@ -79,8 +79,8 @@ class Grammar{
     */
     void Grammar:: read(){
         //store the files names into a string for easier access. also makes it easier to evaulate different files since we would only have to make changes here and not throughout the code
-        string descriptionFile = "equalAsBsGrammar.txt"; //stores the grammar description file to be string easier accessiblilty
-        string inputFile = "equalAsBsGrammarInput.txt"; //stores the input file name as a string for easier accessiblilty
+        string descriptionFile = "astarGrammar.txt"; //stores the grammar description file to be string easier accessiblilty
+        string inputFile = "astarGrammarInput.txt"; //stores the input file name as a string for easier accessiblilty
         cout << "c++ CFGTest " << descriptionFile << " " << inputFile << endl; //this will print out the first line in the expected output, which indicates what the program is coded in, CFGTest, and the description and input file names
 
         //Opens an inputstream to read the description file and store as fin
@@ -150,7 +150,6 @@ class Grammar{
         while(fin.eof() == 0 && !doneReading){
             rules = ""; //reset rules to be an empty string
             getline(fin, rules); //Gets an entire line of the rules of a variable
-
             if(rules.length() > 1){ //If we are still reading a rule
                 //cout <<  "RULES: " << rules << endl; //print out the rule
                 if(counter == 0){ //If we are reading in the start variable, add a special case to add the epsilon
@@ -162,10 +161,7 @@ class Grammar{
                 }
                 int m = 0; //acts as the index for the index of the rules string we're looking at
                 int n = rules.length(); // n is the length of the string of the rules line
-                while(m < n){
-                    //cout << "------NEW LOOP--------" <<endl;
-                    //loops untill we've looked at every index of rules
-                    
+                while(m < n){ //loops untill we've looked at every index of rules                    
                     if(rules.substr(0, 1) == ">" || rules.substr(0, 1) == "|"){ //If we've found one of these symbols, there's a terminal or variable after it
                         string temp = rules.substr(2, rules.length()); //make a substring behind either one of those symbols
                         string newTemp = temp.substr(0, temp.find(" ")); //now make a substring beginning from behind one of those symbols until we reach a space. this will successfully extract the terminal
@@ -184,7 +180,7 @@ class Grammar{
         counter++;  //incremenet and move to the next string
        }
 
-       //print this to indicate that we are printing the rules
+        //print this to indicate that we are printing the rules
         cout << "Rules: " << endl;
         //Prints out the rules in order. If the variable doesn't have a left, right, or epsilon, nothing is printed for that category
         for(int i = 0; i < newVariables.size(); i++){ //we are looping through the entirity of our newVariables size, since each variable has a rule
@@ -193,21 +189,14 @@ class Grammar{
             for(int qq = 0; qq < terminalss.size(); qq++){
                 cout << newVariables[i].getVariable() <<  " -> " << terminalss[qq] << endl;
             }
-            /*if(newVariables[i].hasEpsilon()){ //if the variable has an epsilon terminal, we print the variable followed by an arrow followed an e to indicate epsilon
-                cout << newVariables[i].getVariable() <<  " -> " << "e" << endl;
-            }*/
         }
         //this indicates that we are printing out start variable
         //we stored our last line as rules, which is where the start variable is stored
         cout << "Start Variable: " << rules << endl;
         //read while the input file is not empty
-      //  int ww = 0;
-        //while(ww < 2){
-          //  ww++;
         while(newFin.eof() == 0){
             string inputLine = ""; //Holds the line that's being processed
             getline(newFin, inputLine); //update that string to be the next line in the input file
-
             cout << inputLine << ": "; //prints the input line followed by a colon which will eventually indicate whether that string accepts or rejects
             //if the string is empty, we want to check if the variable accepts epsilon
             if(inputLine == ""){ //if the input line is empty, we need to check if it has an epsilon allowing for that empty string
@@ -221,94 +210,52 @@ class Grammar{
                 int numRows = 300 * inputLine.length(); // we are going to intialize rows and columns for our table. this is kind of a large table but we didn't want to end up with an error due to our table being too small
                 int numCols = 500 * inputLine.length() - 1;
                 vector<vector<string>> table(numRows, vector<string>(numCols, "")); //this is the table that the rules will be inputted in
-                //cout << " " << endl;         
-
-                //Lines 2-5
+                //Lines 2-5 in Sisper
                 for(int i = 0; i < inputLine.length(); i++){ //Examine each substring of length 1
-                   // cout << "new substring----" << endl;
                     string w = inputLine.substr(i, 1); //extracts each character from the input line
                     for(int j = 0; j < newVariables.size(); j++){ //Checking rules of each variable A
                         vector<string> terminalss = newVariables[j].getTerminals();
                         for(int q = 0; q < terminalss.size(); q++){
-                           // cout << newVariables[j].getVariable() << "-->>> " << terminalss[q] << " = " << w << endl;
                             if(terminalss[q] == w){
                                 table[i][i].append(newVariables[j].getVariable());
-                              //  cout << " added "  << newVariables[j].getVariable()<< " should match " << table[i][i] << " to " << i << ", " << i << endl;
                             }
                         }
                     }
                 }
                 //sets the length l of substrings to be analyzed, starting from 2 up to the full input length n.
                 for(int l = 2; l <= inputLine.length(); l++){ //line 6
-                    //cout << "NEW LINE----------" << endl;
-                    //sets the start index i for substrings of length l to iterate over all such substrings in the input.
-                    
+                    //sets the start index i for substrings of length l to iterate over all such substrings in the input.                    
                     for(int i = 0; i <= inputLine.length() - l; i++){ //line 7
-                      //  cout << "newish line" << endl;
-                      //  cout << "this is i " << i <<endl;
                         //calculates the end index `j` of the current substring based on its start index i and length l
                         int j = i + l - 1; //line 8
-                        //cout << i << ", " << j << endl;
                         //iterates over all possible split positions `k` within the current substring from `i` to `j - 1`.
                         for(int k = i; k <= j; k++){ //line 9
-                        //    cout << "this is k " << k <<endl;
-
                             //checks each grammar rule of the form A → BC to find possible variable combinations.
-                            
-                            for(int u = 0; u < newVariables.size(); u++){ //line 10 looks at each rule
-                          //      cout << "this is u " << u <<endl;
-
-                               
-                            //    cout <<" hello " <<  newVariables[u].getVariable() << endl;
-                                
+                            for(int u = 0; u < newVariables.size(); u++){ //line 10 looks at each rule                                                               
                                 vector<string> terminalss = newVariables[u].getTerminals();
-                                //cout << "---new here---" <<endl;
                                 for(int qq = 0; qq < terminalss.size(); qq++){
                                     bool tOne = false; //checking if if table(i, k) contains B
                                     bool tTwo = false; //checking if table(k + 1, j) contains C
-                                  //  cout << "this is q " << qq <<endl;
-
-                                   // cout << qq <<" " << terminalss.size() << endl;
                                     if(terminalss[qq].length() == 2){
-                                        //cout << " looking at " << terminalss[qq] << endl;
                                         string var = terminalss[qq].substr(0,1); //first variable
                                         string var2 = terminalss[qq].substr(1,1); //second variable
                                         string box1 = table[i][k];
-                                      //  cout << table[1][1] << endl;
                                         int b = 0; //a counter  
-                                      //  if(i == 1 && k == 1)
-                                        //    cout << "var 1: " << var << " var2: " << var2 << " box1:" << box1 << ", i: " << i << ", j: " << j << ", k+1: " << k+1 << endl; 
-
                                         while(b < box1.length() && !tOne){ //Checking if table (i,k) contains B
-                                           // if(i == 1 && k == 1)
-                                             //   cout << "------- "<< box1.substr(b, 1) << " " << var << endl;
                                             if(box1.substr(b, 1) == var){ //if the first character in box1 is the first variable
                                                 tOne = true; //table(i, k) contains B
-                                                string box2 = table[k+1][j];//string in the table
-                                               // if(i == 1 && k == 1)
-                                                 //   cout << "^^^^^ " << box2 << endl;    
-                                                //if(i <= 3)
-                                                    //cout << "var 1: " << var << " var2: " << var2 << " box1:" << box1 << " box2 " << box2 << ", i: " << i << ", j: " << j << ", k+1: " << k+1 << endl; 
-                                                  
-                                               // cout << box1.substr(b,1) << " equals " << var << " " << box2 << endl;
-    
+                                                string box2 = table[k+1][j];//string in the table                                                      
                                                 int g = 0;//initialize a counter
-                                           //     cout << "hi " << box2.length() << endl;
-                                              //  cout << box2
                                                 while(g < box2.length() && !tTwo){
                                                     if(box2.substr(g, 1) == var2){ //Checking if table(k + 1, j) contains C
                                                         tTwo = true;// table(k + 1, j) contains C
-                                                   ///     cout << box2.substr(g,1) << " equals " << var2 << endl;
                                                     }
                                                     g++;//increment g 
                                                 }
                                             }
                                             b++;//increment b
                                         }
-                                        if(tOne && tTwo){ //line 11
-                                          //  if(i == 1 && k == 1)
-                                            //cout << "var 1: " << var << " var2: " << var2 << " box1:" << box1 << endl;    
-                                        //    cout << " ^^^^^^^^^adding " << newVariables[u].getVariable() << " at " << i << " " << j << endl;
+                                        if(tOne && tTwo){ //line 11 of Sipser's algorithm
                                             table[i][j].append(newVariables[u].getVariable()); //if both are true add variable A to table(i, j) if B is in table(i, k) and C is in table(k + 1, j).
                                         }
                                     }
@@ -319,9 +266,7 @@ class Grammar{
             }
                 //line 12
                 bool hasS = false; //accepts the input if the start variable S is in table(1, n); otherwise, it rejects.
-                //cout << inputLine.length() - 1 << endl;
                 string f =  table[0][inputLine.length() - 1]; //initializes f as a string in the table
-                ///cout << "look " << f << endl;
                 for(int i = 0; i < f.length(); i++){ //loop thru the entirety of f
                     if(f.substr(i, 1) == "S"){ //if s is found in f, hasS is true
                         hasS = true;
